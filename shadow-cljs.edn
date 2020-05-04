@@ -1,0 +1,25 @@
+{:builds
+ {:app {:asset-path "/js"
+        :modules {:main {:init-fn app.core/main}}
+        :output-dir "public/js"
+        :target :browser
+        :closure-defines {app.login/DOMAIN    #shadow/env "HELLO_SHADOW_AUTH_DOMAIN"
+                          app.login/CLIENT_ID #shadow/env "HELLO_SHADOW_AUTH_CLIENT_ID"
+                          app.login/AUDIENCE  #shadow/env "HELLO_SHADOW_AUTH_AUDIENCE"}}
+  :cards {:asset-path "/js"
+          :modules {:main {:init-fn app.cards/main}}
+          :compiler-options {:devcards true}
+          :output-dir "public/js"
+          :target :browser}
+  :test {:ns-regexp "app.cards"
+         :output-to "out/test.js"
+         :target :node-test}
+  :e2e {:ns-regexp "e2e.*"
+        :output-to "out/e2e.js"
+        :target :node-test}}
+ :dependencies [[reagent "1.0.0-alpha1"]
+                [devcards "0.2.6"]
+                [re-frame "0.12.0"]]
+ :dev-http {3000 "public"}
+ :nrepl {:port 3333}
+ :source-paths ["src"]}
