@@ -36,6 +36,40 @@
    (string/includes? window-location-search "code=")
    (string/includes? window-location-search "state=")))
 
+(defn- store-user-and-token!
+  [context-str auth-client]
+  (do
+    (.then (.getTokenSilently auth-client)
+           (fn [token]
+             (rf/dispatch [:store-auth-token token])))
+    (.then (do
+             (js/console.log (str context-str
+                                  ": User is authenticated."))
+             (.getUser auth-client))
+           #(let [user (js->clj % :keywordize-keys true)]
+              (js/console.log
+               (str context-str
+                    ": User:"
+                    \newline
+                    (with-out-str
+                      (pprint user))))
+              (rf/dispatch [:store-user user])))))
+
+(defn- cleanup-url!
+  "Remove the auth0-specific URL search-params that are added as part of
+  the login redirect"
+  []
+  (let [search-params (js/URLSearchParams. js/window.location.search)]
+    (doseq [k ["code" "state"]]
+      (.delete search-params k))
+    (let [new-url    (js/window.URL. js/window.location.href)
+          new-search (.toString search-params)]
+      ;; NOTE: This is mutating new-url!
+      (go/set new-url "search" new-search)
+      (js/window.history.pushState (clj->js {})
+                                   js/document.title
+                                   new-url))))
+
 (defn request-auth-client!
   "Manages the concern of storing the auth-client,
   which is used to manage the OIDC dance to ensure that a user
@@ -54,10 +88,7 @@
                     (fn [is-authenticated?]
                       (cond
                         is-authenticated?
-                        (.then (.getTokenSilently auth-client)
-                               (fn [token]
-                                 (rf/dispatch [:store-auth-token token])
-                                 true))
+                        (store-user-and-token! "request-auth-client!" auth-client)
 
                         (and (not is-authenticated?)
                              (contains-auth-redirect? js/window.location.search))
@@ -80,39 +111,12 @@
   [auth-client]
   (cond-> (.handleRedirectCallback auth-client)
     true
-    (.then (fn [_]
-             (.getTokenSilently auth-client)))
+    (.then #(.isAuthenticated auth-client))
+
     true
-    (.then (fn [token]
-             (rf/dispatch [:store-auth-token token])))
-    true
-    (.then (fn [_]
-             (cond-> (.isAuthenticated auth-client)
-               true
-               (.then #(when %
-                         (js/console.log "handle-auth-redirect!: User is authenticated.")
-                         (.getUser auth-client)))
-               true
-               (.then #(when %
-                         (let [user (js->clj % :keywordize-keys true)]
-                           (js/console.log
-                            (str "handle-auth-redirect!: User:"
-                                 \newline
-                                 (with-out-str
-                                   (pprint user))))
-                           (rf/dispatch [:store-user user])))))
-             ;; Remove the auth0-specific URL search-params
-             (let [search-params (js/URLSearchParams. js/window.location.search)]
-               (js/console.warn (.toString search-params))
-               (doseq [k ["code" "state"]]
-                 (.delete search-params k))
-               (let [new-url    (js/window.URL. js/window.location.href)
-                     new-search (.toString search-params)]
-                 ;; NOTE: This is mutating new-url!
-                 (go/set new-url "search" new-search)
-                 (js/window.history.pushState (clj->js {})
-                                              js/document.title
-                                              new-url)))))))
+    (.then #(when %
+              (store-user-and-token! "handle-auth-redirect!" auth-client)
+              (cleanup-url!)))))
 
 (defn request-logout!
   "Manages the concern of logging out a user"
