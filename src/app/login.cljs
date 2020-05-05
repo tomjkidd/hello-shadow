@@ -21,7 +21,11 @@
 (def client-id CLIENT_ID)
 (def audience AUDIENCE)
 
-(def auth-config {:domain domain :client_id client-id :audience audience})
+(def auth-config
+  {:domain        domain
+   :client_id     client-id
+   :audience      audience
+   :cacheLocation "localstorage"})
 
 (defn contains-auth-redirect?
   "This is the way the auth0 docs indicate to manage the concern for vanilla js
@@ -46,20 +50,22 @@
 
     true
     (.then (fn [auth-client]
-             (.isAuthenticated auth-client)))
-    true
-    (.then (fn [is-authenticated?]
-             (cond
-               (and (not is-authenticated?)
-                    (contains-auth-redirect? js/window.location.search))
-               (rf/dispatch [:handle-auth-redirect])
+             (.then (.isAuthenticated auth-client)
+                    (fn [is-authenticated?]
+                      (cond
+                        is-authenticated?
+                        (.then (.getTokenSilently auth-client)
+                               (fn [token]
+                                 (rf/dispatch [:store-auth-token token])
+                                 true))
 
-               (and (not is-authenticated?)
-                    (not (contains-auth-redirect? js/window.location.search)))
-               (rf/dispatch [:login])
+                        (and (not is-authenticated?)
+                             (contains-auth-redirect? js/window.location.search))
+                        (rf/dispatch [:handle-auth-redirect])
 
-               ;;TODO: Indicate unexpected state
-               )))))
+                        (and (not is-authenticated?)
+                             (not (contains-auth-redirect? js/window.location.search)))
+                        (rf/dispatch [:login]))))))))
 
 (defn request-login!
   "Manages the concern of entering the OIDC dance to authenticate a user"
