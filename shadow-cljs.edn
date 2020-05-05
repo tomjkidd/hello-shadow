@@ -5,7 +5,8 @@
         :target :browser
         :closure-defines {app.login/DOMAIN    #shadow/env "HELLO_SHADOW_AUTH_DOMAIN"
                           app.login/CLIENT_ID #shadow/env "HELLO_SHADOW_AUTH_CLIENT_ID"
-                          app.login/AUDIENCE  #shadow/env "HELLO_SHADOW_AUTH_AUDIENCE"}}
+                          app.login/AUDIENCE  #shadow/env "HELLO_SHADOW_AUTH_AUDIENCE"}
+        :dev {:compiler-options {:preloads [app.dev]}}}
   :cards {:asset-path "/js"
           :modules {:main {:init-fn app.cards/main}}
           :compiler-options {:devcards true}
@@ -19,7 +20,8 @@
         :target :node-test}}
  :dependencies [[reagent "1.0.0-alpha1"]
                 [devcards "0.2.6"]
-                [re-frame "0.12.0"]]
+                [re-frame "0.12.0"]
+                [binaryage/devtools "1.0.0"]]
  :dev-http {3000 "public"}
  :nrepl {:port 3333}
- :source-paths ["src"]}
+ :source-paths ["dev" "src"]}
