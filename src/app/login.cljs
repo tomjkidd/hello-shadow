@@ -9,6 +9,8 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as rf]
             ["@auth0/auth0-spa-js" :as auth0-spa-js]
+            ["@material-ui/core" :as mui]
+            ["@material-ui/icons" :as mui-icons]
             [goog.object :as go]))
 
 ;; Refer to shadow-cljs.edn [:builds :build-id :closure-defines]
@@ -25,7 +27,11 @@
   {:domain        domain
    :client_id     client-id
    :audience      audience
-   :cacheLocation "localstorage"})
+   ;:cacheLocation "localstorage"
+   })
+
+(def get-token-silently-options
+  (clj->js {:timeoutInSeconds 10}))
 
 (defn contains-auth-redirect?
   "This is the way the auth0 docs indicate to manage the concern for vanilla js
@@ -39,7 +45,7 @@
 (defn- store-user-and-token!
   [context-str auth-client]
   (do
-    (.then (.getTokenSilently auth-client)
+    (.then (.getTokenSilently auth-client get-token-silently-options)
            (fn [token]
              (rf/dispatch [:store-auth-token token])))
     (.then (do
@@ -128,10 +134,14 @@
   []
   (let [user @(rf/subscribe [:user])]
     [:div
-     [:div (str "Welcome, " (:name user))]
-     [:input {:type     "button"
-              :value    "Logout"
-              :on-click #(rf/dispatch [:logout])}]]))
+     (str "Welcome, " (:name user))
+     [:> mui/Button
+      {:variant  "outlined"
+       :color    "secondary"
+       :size     "small"
+       :on-click #(rf/dispatch [:logout])}
+      "Logout"
+      [:> mui-icons/Clear]]]))
 
 (defn not-logged-in
   []

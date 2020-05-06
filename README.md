@@ -93,3 +93,11 @@ I started with the application that was provided by https://github.com/filipesil
 
 https://auth0.com/docs/quickstart/spa/vanillajs
 https://auth0.com/docs/quickstart/spa/vanillajs/02-calling-an-api
+
+## Resources
+
+https://github.com/reagent-project/reagent
+https://github.com/reagent-project/reagent/blob/master/doc/ReactFeatures.md
+https://github.com/reagent-project/reagent/blob/master/doc/InteropWithReact.md#creating-reagent-components-from-react-components
+
+https://material-ui.com/getting-started/supported-components/

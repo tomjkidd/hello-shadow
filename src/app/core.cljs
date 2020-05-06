@@ -3,6 +3,7 @@
   (:require [reagent.dom :as rdom]
             [app.hello :as hello]
             [app.login :as login]
+            [app.header :as header]
             [re-frame.core :as rf]
             [app.state.subs];; to load subscriptions
             [app.state.events];; to load events
@@ -13,6 +14,7 @@
   (let [logged-in? @(rf/subscribe [:logged-in?])]
     (cond-> [:div]
       logged-in?       (into [[login/welcome]
+                              [header/header]
                               [hello/hello]])
       (not logged-in?) (conj [login/not-logged-in]))))
 
