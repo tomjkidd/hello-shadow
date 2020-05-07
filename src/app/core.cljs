@@ -13,8 +13,7 @@
   []
   (let [logged-in? @(rf/subscribe [:logged-in?])]
     (cond-> [:div]
-      logged-in?       (into [[login/welcome]
-                              [header/header]
+      logged-in?       (into [[header/header]
                               [hello/hello]])
       (not logged-in?) (conj [login/not-logged-in]))))
 
