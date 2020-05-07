@@ -87,7 +87,7 @@ mui/FormGroup
               "Account"]
              [:> mui/MenuItem
               {:on-click #(do
-                            (js/console.warn {:clicked :logout})
+                            (rf/dispatch [:logout])
                             (handle-close %))}
               "Logout"]]]]]]))))
 
