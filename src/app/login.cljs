@@ -144,5 +144,9 @@
       [:> mui-icons/Clear]]]))
 
 (defn not-logged-in
+  "Puts up a spinning backdrop to indicate the app is loading"
   []
-  [:div "User is not logged in."])
+  [:div "User is not logged in."
+   [:> mui/Backdrop
+    {:open true}
+    [:> mui/CircularProgress]]])
