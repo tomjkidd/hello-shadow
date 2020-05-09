@@ -36,6 +36,14 @@
                                 {:user/id    (:sub user)
                                  :user/name  (:name user)
                                  :user/email (:email user)})))))
+(rf/reg-event-fx :nav
+  (fn [{:keys [db]} [_ nav-target :as nav-event]]
+    {:db          (assoc db :page nav-target)
+     :request-nav nav-event}))
+
+(rf/reg-fx :request-nav
+  (fn [nav-target]
+    (js/console.warn {:todo (str "Perform navigation to " nav-target)})))
 
 (rf/reg-event-db :logout
   (fn [db [_]]

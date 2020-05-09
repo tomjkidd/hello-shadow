@@ -25,3 +25,32 @@
                                  [:token/id :access-token]
                                  [:token/value])]
       value)))
+
+(reg-sub :page
+  (fn [{:keys [page]}]
+    page))
+
+(reg-sub :page-query
+  (fn [{:keys [user page] :as _db}]
+    ;; TODO: The app db should be all that is required to determine what needs to render.
+    ;;       Right now, just the page is sufficient
+    ;; Construct an EQL query that provides the data in the shape of the UI
+    (case page
+      :home
+      [[:token/id :access-token] [:token/value]]
+      :profile
+      [[:user/id (:sub user)] [:user/id :user/name :user/email]]
+
+      ;; else
+      [])))
+
+(reg-sub :page-props
+  (fn object-graph-query-results [{:keys [object-graph] :as x} y [[ident eql] _user :as z]]
+    (js/console.warn {:x x :y y :z z :ident ident :eql eql})
+    ;; Use the page-query eql to get the props for the page
+    (let [result (graph/object-graph-query
+                  object-graph
+                  ident
+                  eql)]
+      (js/console.warn {:query-results result})
+      result)))

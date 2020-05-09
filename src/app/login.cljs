@@ -94,7 +94,8 @@
                     (fn [is-authenticated?]
                       (cond
                         is-authenticated?
-                        (store-user-and-token! "request-auth-client!" auth-client)
+                        (do (store-user-and-token! "request-auth-client!" auth-client)
+                            (rf/dispatch [:nav :home]))
 
                         (and (not is-authenticated?)
                              (contains-auth-redirect? js/window.location.search))
@@ -122,7 +123,8 @@
     true
     (.then #(when %
               (store-user-and-token! "handle-auth-redirect!" auth-client)
-              (cleanup-url!)))))
+              (cleanup-url!)
+              (rf/dispatch [:nav :home])))))
 
 (defn request-logout!
   "Manages the concern of logging out a user"

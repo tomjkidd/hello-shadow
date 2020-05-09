@@ -16,16 +16,15 @@
             :on-click #(rf/dispatch [:print-db])}]])
 
 (defn display-token
-  []
-  (let [token @(rf/subscribe [:access-token])]
-    [:input {:type "text" :value token}]))
+  [{:token/keys [value]}]
+  [:input {:type "text" :value value}])
 
 (def click-count (r/atom 0))
 
-(defn hello []
+(defn hello [page-props]
   [:<>
    [:p "Hello, hello-shadow is running!"]
    [:p "Here's an example of using a component with state:"]
    [click-counter click-count]
    [print-db]
-   [display-token]])
+   [display-token page-props]])

@@ -1,12 +1,9 @@
 (ns app.header
-  (:require [clojure.pprint :refer [pprint]]
-            [clojure.string :as string]
-            [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :as rf]
             ["@material-ui/core" :as mui]
             ["@material-ui/icons" :as mui-icons]
-            ["@material-ui/core/styles" :refer [withStyles]]
-            [goog.object :as go]))
+            ["@material-ui/core/styles" :refer [withStyles]]))
 
 mui/Switch
 mui/FormControlLabel
@@ -16,7 +13,8 @@ mui/FormGroup
   (clj->js
    {:root        {:flexGrow 1}
     :menu-button {:margin-right (.spacing theme 2)}
-    :title       {:flexGrow 1}}))
+    :title       {:flexGrow 1
+                  :cursor   "pointer"}}))
 
 (def with-custom-styles (withStyles custom-styles))
 
@@ -41,7 +39,6 @@ mui/FormGroup
                                          :anchor-el
                                          nil))
             open?               (boolean anchor-el)]
-        (js/console.warn classes)
         [:div
          {:class (.-root classes)}
          [:> mui/AppBar
@@ -56,8 +53,9 @@ mui/FormGroup
             [:> mui-icons/Menu]]
            [:> mui/Typography
             {:class (.-title classes)
-             :variant "h6"}
-            "Header"]
+             :variant "h6"
+             :on-click #(rf/dispatch [:nav :home])}
+            "App"]
            [:div
             [:> mui/IconButton
              {:aria-label    "account of current user"
@@ -77,7 +75,7 @@ mui/FormGroup
               :onClose         handle-close}
              [:> mui/MenuItem
               {:on-click #(do
-                            (js/console.warn {:clicked :profile})
+                            (rf/dispatch [:nav :profile])
                             (handle-close %))}
               "Profile"]
              [:> mui/MenuItem
