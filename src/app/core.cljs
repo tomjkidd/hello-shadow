@@ -7,6 +7,7 @@
             [re-frame.core :as rf]
             [app.state.subs];; to load subscriptions
             [app.state.events];; to load events
+            [app.graph]
             ))
 
 (defn app

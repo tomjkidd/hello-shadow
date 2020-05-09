@@ -1,5 +1,6 @@
 (ns app.state.subs
-  (:require [re-frame.core :refer [reg-sub]]))
+  (:require [re-frame.core :refer [reg-sub]]
+            [app.graph :as graph]))
 
 (reg-sub :auth-client
   (fn [{:keys [auth-client]} _]
@@ -16,3 +17,11 @@
 (reg-sub :user
   (fn [{:keys [user]} _]
     user))
+
+(reg-sub :access-token
+  (fn [{:keys [object-graph]}]
+    (let [{::graph/keys [token]} (graph/object-graph-query
+                                  object-graph
+                                  [::graph/token-id :access-token]
+                                  [::graph/token])]
+      token)))

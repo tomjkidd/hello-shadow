@@ -1,7 +1,8 @@
 (ns app.state.events
   (:require [app.state.db :as db]
             [re-frame.core :as rf]
-            [app.login :as login]))
+            [app.login :as login]
+            [app.graph :as graph]))
 
 (rf/reg-event-db :initialize-db
   (fn [_ _]
@@ -17,11 +18,24 @@
 
 (rf/reg-event-db :store-auth-token
   (fn [db [_ token]]
-    (assoc db :auth-token token)))
+    (-> db
+        (assoc :auth-token token)
+        (update :object-graph #(graph/object-graph-merge
+                                %
+                                ::graph/token
+                                {::graph/token-id :access-token
+                                 ::graph/token    token})))))
 
 (rf/reg-event-db :store-user
   (fn [db [_ user]]
-    (assoc db :user user)))
+    (-> db
+        (assoc :user user)
+        (update :object-graph #(graph/object-graph-merge
+                                %
+                                ::graph/user
+                                {::graph/user-id    (:sub user)
+                                 ::graph/user-name  (:name user)
+                                 ::graph/user-email (:email user)})))))
 
 (rf/reg-event-db :logout
   (fn [db [_]]
@@ -46,6 +60,10 @@
     (let [{:keys [auth-client]} db]
       {:request-logout auth-client})))
 
+(rf/reg-event-fx :print-db
+  (fn [{:keys [db]} [_]]
+    {:print-db db}))
+
 ;; The auth-client is needed to issue requests to handle getting a token
 (rf/reg-fx :request-auth-client
   (fn []
@@ -65,3 +83,7 @@
 (rf/reg-fx :request-logout
   (fn [auth-client]
     (login/request-logout! auth-client)))
+
+(rf/reg-fx :print-db
+  (fn [db]
+    (js/console.warn db)))
