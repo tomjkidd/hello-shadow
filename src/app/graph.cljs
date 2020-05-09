@@ -24,12 +24,12 @@
   (merge/merge-component {} Scoreboard {::scoreboard-id :a ::scores [{::score-id :s1 ::points 10}]}))
 
 (defsc User [_ props]
-  {:ident [::user-id ::user-id]
-   :query [::user-id ::user-name ::user-email]})
+  {:ident [:user/id :user/id]
+   :query [:user/id :user/name :user/email]})
 
 (defsc Token [_ props]
-  {:ident [::token-id ::token-id]
-   :query [::token-id ::token]})
+  {:ident [:token/id :token/id]
+   :query [:token/id :token/value]})
 
 (def entity-type-map
   "Create an indirect mapping so that the entities can be used without knowledge of defsc components"

@@ -20,8 +20,8 @@
 
 (reg-sub :access-token
   (fn [{:keys [object-graph]}]
-    (let [{::graph/keys [token]} (graph/object-graph-query
-                                  object-graph
-                                  [::graph/token-id :access-token]
-                                  [::graph/token])]
-      token)))
+    (let [{:token/keys [value]} (graph/object-graph-query
+                                 object-graph
+                                 [:token/id :access-token]
+                                 [:token/value])]
+      value)))

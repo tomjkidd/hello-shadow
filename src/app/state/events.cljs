@@ -23,8 +23,8 @@
         (update :object-graph #(graph/object-graph-merge
                                 %
                                 ::graph/token
-                                {::graph/token-id :access-token
-                                 ::graph/token    token})))))
+                                {:token/id    :access-token
+                                 :token/value token})))))
 
 (rf/reg-event-db :store-user
   (fn [db [_ user]]
@@ -33,9 +33,9 @@
         (update :object-graph #(graph/object-graph-merge
                                 %
                                 ::graph/user
-                                {::graph/user-id    (:sub user)
-                                 ::graph/user-name  (:name user)
-                                 ::graph/user-email (:email user)})))))
+                                {:user/id    (:sub user)
+                                 :user/name  (:name user)
+                                 :user/email (:email user)})))))
 
 (rf/reg-event-db :logout
   (fn [db [_]]
