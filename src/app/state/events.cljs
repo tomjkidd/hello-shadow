@@ -24,7 +24,12 @@
                                 %
                                 ::graph/token
                                 {:token/id    :access-token
-                                 :token/value token})))))
+                                 :token/value token}))
+        (update :object-graph #(graph/object-graph-merge
+                                %
+                                ::graph/ui-login
+                                {:ui-login/id           :logged-in-user
+                                 :ui-login/access-token [:token/id :access-token]})))))
 
 (rf/reg-event-db :store-user
   (fn [db [_ user]]
@@ -35,7 +40,12 @@
                                 ::graph/user
                                 {:user/id    (:sub user)
                                  :user/name  (:name user)
-                                 :user/email (:email user)})))))
+                                 :user/email (:email user)}))
+        (update :object-graph #(graph/object-graph-merge
+                                %
+                                ::graph/ui-login
+                                {:ui-login/id   :logged-in-user
+                                 :ui-login/user [:user/id (:sub user)]})))))
 (rf/reg-event-fx :nav
   (fn [{:keys [db]} [_ nav-target :as nav-event]]
     {:db          (assoc db :page nav-target)

@@ -31,15 +31,15 @@
     page))
 
 (reg-sub :page-query
-  (fn [{:keys [user page] :as _db}]
+  (fn [{:keys [page] :as _db}]
     ;; TODO: The app db should be all that is required to determine what needs to render.
     ;;       Right now, just the page is sufficient
     ;; Construct an EQL query that provides the data in the shape of the UI
     (case page
       :home
-      [[:token/id :access-token] [:token/value]]
+      [[:ui-login/id :logged-in-user] [{:ui-login/access-token [:token/value]}]]
       :profile
-      [[:user/id (:sub user)] [:user/id :user/name :user/email]]
+      [[:ui-login/id :logged-in-user] [{:ui-login/user [:user/id :user/name :user/email]}]]
 
       ;; else
       [])))

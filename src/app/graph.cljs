@@ -31,10 +31,17 @@
   {:ident [:token/id :token/id]
    :query [:token/id :token/value]})
 
+(defsc UiLogin [_ props]
+  {:ident [:ui-login/id :ui-login/id]
+   :query [:ui-login/id
+           {:ui-login/user (comp/get-query User)}
+           {:ui-login/access-token (comp/get-query Token)}]})
+
 (def entity-type-map
   "Create an indirect mapping so that the entities can be used without knowledge of defsc components"
   {::token Token
-   ::user  User})
+   ::user  User
+   ::ui-login UiLogin})
 
 (def get-in-graph nsh/get-in-graph)
 

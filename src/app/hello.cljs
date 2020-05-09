@@ -21,10 +21,10 @@
 
 (def click-count (r/atom 0))
 
-(defn hello [page-props]
+(defn hello [{:ui-login/keys [access-token] :as _page-props}]
   [:<>
    [:p "Hello, hello-shadow is running!"]
    [:p "Here's an example of using a component with state:"]
    [click-counter click-count]
    [print-db]
-   [display-token page-props]])
+   [display-token access-token]])
