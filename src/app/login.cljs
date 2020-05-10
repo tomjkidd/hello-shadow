@@ -132,19 +132,6 @@
   (.logout auth-client
    (clj->js {:returnTo js/window.location.origin})))
 
-(defn welcome
-  []
-  (let [user @(rf/subscribe [:user])]
-    [:div
-     (str "Welcome, " (:name user))
-     [:> mui/Button
-      {:variant  "outlined"
-       :color    "secondary"
-       :size     "small"
-       :on-click #(rf/dispatch [:logout])}
-      "Logout"
-      [:> mui-icons/Clear]]]))
-
 (defn not-logged-in
   "Puts up a spinning backdrop to indicate the app is loading"
   []

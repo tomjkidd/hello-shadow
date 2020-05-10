@@ -25,6 +25,19 @@
    ;; Fulcro and re-frame will share their db!
    ::app/state-atom app-db))
 
+(defn get-page-query
+  [page]
+  ;; TODO: The app db should be all that is required to determine what needs to render.
+  ;;       Right now, just the page is sufficient
+  ;; Construct an EQL query that provides the data in the shape of the UI
+  (case page
+    :home
+    [[:ui-login/id :logged-in-user] [{:ui-login/access-token [:token/value]}]]
+    :profile
+    [[:ui-login/id :logged-in-user] [{:ui-login/user [:user/id :user/name :user/email]}]]
+
+    ;; else
+    []))
 
 (defsc User [_ props]
   {:ident [:user/id :user/id]
@@ -39,6 +52,10 @@
    :query [:ui-login/id
            {:ui-login/user (comp/get-query User)}
            {:ui-login/access-token (comp/get-query Token)}]})
+
+(def ui-login-id
+  "The :ui-login/id value to use to represent the logged-in user"
+  :logged-in-user)
 
 (defsc UiPage [_ props]
   {:ident [:ui-page/id :ui-page/id]

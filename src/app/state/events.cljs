@@ -12,36 +12,35 @@
   (fn [db [_ client]]
     (assoc db :auth-client client)))
 
-(rf/reg-event-db :store-authenticated
-  (fn [db [_ is-authenticated?]]
-    (assoc db :authenticated is-authenticated?)))
-
 (rf/reg-event-db :store-auth-token
   (fn [db [_ token]]
-    (-> db
-        (assoc :auth-token token)
-        (graph/object-graph-merge ::graph/token
-                                  {:token/id    :access-token
-                                   :token/value token})
-        (graph/object-graph-merge ::graph/ui-login
-                                  {:ui-login/id           :logged-in-user
-                                   :ui-login/access-token [:token/id :access-token]}))))
+    (let [token-id :access-token]
+      (-> db
+          (graph/object-graph-merge ::graph/token
+                                    {:token/id    token-id
+                                     :token/value token})
+          (graph/object-graph-merge ::graph/ui-login
+                                    {:ui-login/id           graph/ui-login-id
+                                     :ui-login/access-token [:token/id token-id]})))))
 
 (rf/reg-event-db :store-user
   (fn [db [_ user]]
-    (-> db
-        (assoc :user user)
-        (graph/object-graph-merge ::graph/user
-                                  {:user/id    (:sub user)
-                                   :user/name  (:name user)
-                                   :user/email (:email user)})
-        (graph/object-graph-merge ::graph/ui-login
-                                  {:ui-login/id   :logged-in-user
-                                   :ui-login/user [:user/id (:sub user)]}))))
+    (let [user-id (:sub user)]
+      (-> db
+          (graph/object-graph-merge ::graph/user
+                                    {:user/id    user-id
+                                     :user/name  (:name user)
+                                     :user/email (:email user)})
+          (graph/object-graph-merge ::graph/ui-login
+                                    {:ui-login/id   graph/ui-login-id
+                                     :ui-login/user [:user/id user-id]})))))
 
 (rf/reg-event-fx :nav
   (fn [{:keys [db]} [_ nav-target :as nav-event]]
-    {:db          (assoc db :page nav-target)
+    ;; TODO: Add route/match information for page, and use as graph
+    {:db          (-> db
+                      (assoc :page nav-target)
+                      (assoc :page-query (graph/get-page-query nav-target)))
      :request-nav nav-event}))
 
 (rf/reg-fx :request-nav
@@ -52,7 +51,7 @@
 
 (rf/reg-event-db :logout
   (fn [db [_]]
-    (dissoc db :auth-token)))
+    (dissoc db :ui-login/id :user/id :token/id)))
 
 (rf/reg-event-fx :initialize-auth
   (fn [{:keys [db]} [_]]
