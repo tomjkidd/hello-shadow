@@ -20,32 +20,25 @@
   (fn [db [_ token]]
     (-> db
         (assoc :auth-token token)
-        (update :object-graph #(graph/object-graph-merge
-                                %
-                                ::graph/token
-                                {:token/id    :access-token
-                                 :token/value token}))
-        (update :object-graph #(graph/object-graph-merge
-                                %
-                                ::graph/ui-login
-                                {:ui-login/id           :logged-in-user
-                                 :ui-login/access-token [:token/id :access-token]})))))
+        (graph/object-graph-merge ::graph/token
+                                  {:token/id    :access-token
+                                   :token/value token})
+        (graph/object-graph-merge ::graph/ui-login
+                                  {:ui-login/id           :logged-in-user
+                                   :ui-login/access-token [:token/id :access-token]}))))
 
 (rf/reg-event-db :store-user
   (fn [db [_ user]]
     (-> db
         (assoc :user user)
-        (update :object-graph #(graph/object-graph-merge
-                                %
-                                ::graph/user
-                                {:user/id    (:sub user)
-                                 :user/name  (:name user)
-                                 :user/email (:email user)}))
-        (update :object-graph #(graph/object-graph-merge
-                                %
-                                ::graph/ui-login
-                                {:ui-login/id   :logged-in-user
-                                 :ui-login/user [:user/id (:sub user)]})))))
+        (graph/object-graph-merge ::graph/user
+                                  {:user/id    (:sub user)
+                                   :user/name  (:name user)
+                                   :user/email (:email user)})
+        (graph/object-graph-merge ::graph/ui-login
+                                  {:ui-login/id   :logged-in-user
+                                   :ui-login/user [:user/id (:sub user)]}))))
+
 (rf/reg-event-fx :nav
   (fn [{:keys [db]} [_ nav-target :as nav-event]]
     {:db          (assoc db :page nav-target)
@@ -53,6 +46,8 @@
 
 (rf/reg-fx :request-nav
   (fn [nav-target]
+    ;; TODO: Integrate this call
+    ;(df/load! SPA :all-accounts Account)
     (js/console.warn {:todo (str "Perform navigation to " nav-target)})))
 
 (rf/reg-event-db :logout

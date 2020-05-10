@@ -2,5 +2,4 @@
 
 (def default-db
   {:auth-client nil
-   :auth-token nil
-   :object-graph {}})
+   :auth-token  nil})

@@ -3,25 +3,28 @@
 
   The desire is to leverage the work of fulcro to get an EQL-based graph
   database, but not to buy into actually building UI elements with it."
-  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+  (:require [com.fulcrologic.fulcro.application :as app]
             [com.fulcrologic.fulcro.algorithms.merge :as merge]
             [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
-            [com.fulcrologic.fulcro.algorithms.normalized-state :as nsh]))
+            [com.fulcrologic.fulcro.algorithms.normalized-state :as nsh]
+            [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+            [com.fulcrologic.fulcro.networking.http-remote :as net]
+            [re-frame.db :refer [app-db]]))
 
-(comment
-  "lifted from https://github.com/fulcrologic/fulcro/blob/develop/src/test/com/fulcrologic/fulcro/algorithms/merge_spec.cljc,
-  and kept around for reference so that more complex usage can evolve"
-  (defsc Score
-    [_ {::keys []}]
-    {:ident [::score-id ::score-id]
-     :query [::score-id ::points :ui/expanded?]})
+;; NOTE: This is the fulcro app, which currently provides EQL and object-graph capabilities
+;;       It is explicitly not being used to control render!
+;;       It should be capable of everything that fulcro knows how to do, aside from render related things
+;;       See this [fulcro-commit][fulcro-commit] for more details
+;; [fulcro-commit]:https://github.com/awkay/fulcro-with-reframe/commit/07ea925b0296915a4babb4592cb133a51c1e93fd
+(defonce fulcro-app
+  (assoc
+   (app/fulcro-app {:optimized-render! identity
+                    :render-root!      identity
+                    :hydrate-root!     identity
+                    :remotes           {:remote (net/fulcro-http-remote {:url "/api"})}})
+   ;; Fulcro and re-frame will share their db!
+   ::app/state-atom app-db))
 
-  (defsc Scoreboard [_ props]
-    {:ident [::scoreboard-id ::scoreboard-id]
-     :query [::scoreboard-id
-             {::scores (comp/get-query Score)}]} "")
-
-  (merge/merge-component {} Scoreboard {::scoreboard-id :a ::scores [{::score-id :s1 ::points 10}]}))
 
 (defsc User [_ props]
   {:ident [:user/id :user/id]
@@ -36,6 +39,16 @@
    :query [:ui-login/id
            {:ui-login/user (comp/get-query User)}
            {:ui-login/access-token (comp/get-query Token)}]})
+
+(defsc UiPage [_ props]
+  {:ident [:ui-page/id :ui-page/id]
+   :query [:ui-page/id :ui-page/name :ui-page/query]})
+
+(defsc UiRoot [_ props]
+  {:ident [:ui-root/id :ui-root/id]
+   :query [:ui-root/id
+           {:ui-root/ui-login (comp/get-query UiLogin)}
+           {:ui-root/ui-page (comp/get-query UiPage)}]})
 
 (def entity-type-map
   "Create an indirect mapping so that the entities can be used without knowledge of defsc components"

@@ -6,10 +6,14 @@
             [app.header :as header]
             [app.profile :as profile]
             [re-frame.core :as rf]
-            [app.state.subs];; to load subscriptions
+
+            [app.graph :as graph]
+            [com.fulcrologic.fulcro.application :as app]
+            [com.fulcrologic.fulcro.inspect.inspect-client :as inspect]
+
+            [app.state.subs]   ;; to load subscriptions
             [app.state.events];; to load events
             [app.routes]
-            [app.graph :as graph]
             ))
 
 (defn ui-page
@@ -25,11 +29,10 @@
 
 (defn ui-app
   []
-  (let [user (rf/subscribe [:user])
-        logged-in? @(rf/subscribe [:logged-in?])
+  (let [logged-in? @(rf/subscribe [:logged-in?])
         page @(rf/subscribe [:page])
         page-query (rf/subscribe [:page-query])
-        page-props @(rf/subscribe [:page-props] [page-query user])]
+        page-props @(rf/subscribe [:page-props] [page-query])]
     [ui-page logged-in? page page-props]))
 
 (defn ^:dev/after-load render
@@ -42,4 +45,8 @@
   []
   (rf/dispatch-sync [:initialize-db])
   (rf/dispatch-sync [:initialize-auth])
+
+  ;; Initialize fulcro
+  (app/set-root! graph/fulcro-app graph/UiRoot {:initialize-state? true})
+  (inspect/app-started! graph/fulcro-app)
   (render))

@@ -45,11 +45,10 @@
       [])))
 
 (reg-sub :page-props
-  (fn object-graph-query-results [{:keys [object-graph] :as x} y [[ident eql] _user :as z]]
-    (js/console.warn {:x x :y y :z z :ident ident :eql eql})
+  (fn object-graph-query-results [db _ [[ident eql]]]
     ;; Use the page-query eql to get the props for the page
     (let [result (graph/object-graph-query
-                  object-graph
+                  db
                   ident
                   eql)]
       (js/console.warn {:query-results result})

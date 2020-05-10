@@ -6,12 +6,14 @@
         :closure-defines {app.login/DOMAIN    #shadow/env "HELLO_SHADOW_AUTH_DOMAIN"
                           app.login/CLIENT_ID #shadow/env "HELLO_SHADOW_AUTH_CLIENT_ID"
                           app.login/AUDIENCE  #shadow/env "HELLO_SHADOW_AUTH_AUDIENCE"}
-        :dev {:compiler-options {:preloads [app.dev]}}}
-  :cards {:asset-path "/js"
-          :modules {:main {:init-fn app.cards/main}}
+        :dev {:compiler-options {:preloads [app.dev]}}
+        :devtools {;:after-load app.client/refresh
+                   :preloads   [com.fulcrologic.fulcro.inspect.preload app.dev]}}
+  :cards {:asset-path       "/js"
+          :modules          {:main {:init-fn app.cards/main}}
           :compiler-options {:devcards true}
-          :output-dir "public/js"
-          :target :browser}
+          :output-dir       "public/js"
+          :target           :browser}
   :test {:ns-regexp "app.cards"
          :output-to "out/test.js"
          :target :node-test}
@@ -22,7 +24,7 @@
                 [devcards "0.2.6" :exclusions [cljsjs/react cljsjs/react-dom]]
                 [re-frame "0.12.0"]
                 [com.wsscode/pathom "2.2.26"]
-                [com.fulcrologic/fulcro "3.0.9" :exclusions [cljsjs/react cljsjs/react-dom]]
+                [com.fulcrologic/fulcro "3.2.4" :exclusions [cljsjs/react cljsjs/react-dom]]
                 [binaryage/devtools "1.0.0"]]
  :dev-http {3000 "public"}
  :nrepl {:port 3333}
