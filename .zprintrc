@@ -1,1 +1,1 @@
-{:style :indent-only}
+{:style [:respect-nl :how-to-ns :community :hiccup :justified]}
